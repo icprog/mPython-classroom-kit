@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # mPython掌控板
 欢迎您，使用掌控板！
 
@@ -10,3 +11,7 @@ mPython掌控板在线文档: https://mPython.readthedocs.io
 
 
 <img src="https://img.shields.io/badge/License-MIT-green.svg" />
+=======
+# mPython-box
+掌控板实验箱
+>>>>>>> 4b62fd1684811828bcb4f66cf21f793c68d252a8
