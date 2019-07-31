@@ -10,7 +10,7 @@
 
 from machine import I2C, PWM, Pin, ADC, TouchPad, UART
 from ssd1106 import SSD1106_I2C
-import esp, math, time, network
+import esp, math, time, network, ujson
 import ustruct, array
 from neopixel import NeoPixel
 from esp import dht_readinto
@@ -137,7 +137,6 @@ class Bit():
     BIT5 = 0x20
     BIT6 = 0x40
     BIT7 = 0x80
-
 class Mpu6050():
     """  """
 
@@ -771,6 +770,78 @@ pir = Pin(21, mode = Pin.IN, pull = None)
 
 # codec es8388
 es8388 = Es8388()
+
+uart2 = UART(2, baudrate=115200, rx=Pin.P8, tx=Pin.P23, timeout=20, timeout_char = 20, rxbuf = 256)
+class K210():
+   def __init__(self):
+        t1 = time.ticks_ms()
+        while (time.ticks_diff(time.ticks_ms(), t1) < 10000):
+            rsp = self.send_cmd({'GET_KEYS':0}) #通过发获取按键指令测试K210是否初始化成功
+            if rsp and isinstance(rsp, dict):
+                for key,value in rsp.items():
+                    if key == 'RET_KEYS': 
+                        return
+        raise Exception("K210 init failed!")
+
+   def send_cmd(self, command, timeout = 100):
+      json_stream = ujson.dumps(command)
+      uart2.write(json_stream + '\n')
+      t1 = time.ticks_ms()
+      while True:
+         if uart2.any() > 0:
+               r = uart2.readline()
+               try:
+                  rsp = ujson.loads(r)
+                  return rsp 
+               except:
+                  pass
+         if time.ticks_diff(time.ticks_ms(), t1) > timeout:
+            # raise Exception("k210 not respone!") 
+            break           
+      return None
+
+   def get_key(self):
+      rsp = self.send_cmd({'GET_KEYS':0})
+      if rsp and isinstance(rsp, dict):
+            for key,value in rsp.items():
+               if key == 'RET_KEYS': 
+                  return value
+      return None
+
+   def get_distance(self):
+      rsp = self.send_cmd({'GET_DISTANCE':0})
+      if rsp and isinstance(rsp, dict):
+            for key,value in rsp.items():
+               if key == 'RET_DISTANCE': 
+                  return value
+      return None
+
+   def ai_recognize(self):
+      rsp = self.send_cmd({'SNAPSOT':'ai'})
+      if rsp and isinstance(rsp, dict):
+            for key,value in rsp.items():
+               if key == 'FACES': 
+                  if value:
+                     return value[0]
+      return None
+
+   def monitor(self, mode):
+      rsp = self.send_cmd({'MONITOR':mode})
+      if rsp and isinstance(rsp, dict):
+         for key,value in rsp.items():
+               if key == 'FACES':
+                  if value:
+                     return value[0]
+      return None
+
+   def set_motor(self, speed):
+      rsp = self.send_cmd({'SET_MOTOR':speed})
+      if rsp and isinstance(rsp, dict):
+         for key,value in rsp.items():
+               if key == 'RET_MOTOR': 
+                  return value
+      return None
+k210 = K210()
 
 from gui import *
 
