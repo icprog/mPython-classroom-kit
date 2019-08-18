@@ -252,7 +252,7 @@ void renderer_init(renderer_config_t *config)
     // update global
     renderer_instance = config;
 
-    // ESP_LOGE(TAG, "init I2S mode %d, port %d, %d bit, %d Hz", config->output_mode, config->i2s_num, config->bit_depth, config->sample_rate);
+    // ESP_LOGE(TAG, "init I2S , port %d, %d bit, %d Hz",  renderer_instance->i2s_num, renderer_instance->bit_depth, renderer_instance->sample_rate);
     init_i2s(config);
 }
 
@@ -304,7 +304,7 @@ void i2s_adc_data_scale(uint8_t * d_buff, uint8_t* s_buff, uint32_t len)
     { 
         // memcpy(d_buff, s_buff, len);
         for (int i = 0; i < len; i += 2) {
-            adc_val = ((((uint16_t) (s_buff[i + 1] & 0xf) << 8) | ((s_buff[i + 0]))));
+            adc_val = ((((uint16_t) (s_buff[i + 1] & 0xff) << 8) | ((s_buff[i + 0]))));
             adc_val = (adc_val - 2048 - 300) << 4; 
             d_buff[j++] = adc_val & 0xff;
             d_buff[j++] = (adc_val >> 8) & 0xff;
@@ -318,16 +318,17 @@ void i2s_adc_data_scale(uint8_t * d_buff, uint8_t* s_buff, uint32_t len)
 void i2s_adc_data_scale1(uint16_t * d_buff, uint8_t* s_buff, uint32_t len)
 {
     uint32_t j = 0;
-    uint16_t adc_val;
+    int16_t adc_val;
 
     if(renderer_instance->bit_depth == I2S_BITS_PER_SAMPLE_16BIT) 
     {
         // memcpy(d_buff, s_buff, len);
         for (int i = 0; i < len; i += 2) {
-            adc_val = ((((uint16_t) (s_buff[i + 1] & 0xf) << 8) | ((s_buff[i + 0]))));
-            // adc_val = (adc_val - 2048 - 300) << 2; 
-            d_buff[j++] = adc_val;
-            // printf("%d", adc_val);
+            adc_val = (int16_t) (((s_buff[i + 1] & 0xff) << 8) | s_buff[i + 0]);
+            // adc_val = (adc_val - 2048 - 300) << 2;
+            // adc_val = (adc_val < 0)? 0:adc_val;
+            d_buff[j++] = abs(adc_val);
+            // printf("%d ", adc_val);
         }
         // printf("\r\n");
     }

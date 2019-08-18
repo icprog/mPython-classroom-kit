@@ -489,36 +489,30 @@ STATIC mp_obj_t audio_recorder_init(void)
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(audio_recorder_init_obj, audio_recorder_init);
 
-// STATIC mp_obj_t audio_loudness(void)
-// {
-//     renderer_config_t *renderer = renderer_get();
-//     uint32_t len = 32; //320bytes: record 10ms
-//     uint16_t *d_buff = calloc(len/2, sizeof(uint16_t));
-//     uint8_t *read_buff = calloc(len, sizeof(uint8_t)); 
+STATIC mp_obj_t audio_loudness(void)
+{
+    renderer_config_t *renderer = renderer_get();
+    if(renderer != NULL){
+        uint32_t len = 32; //320bytes: record 10ms
+        uint16_t *d_buff = calloc(len/2, sizeof(uint16_t));
+        uint8_t *read_buff = calloc(len, sizeof(uint8_t)); 
+    
+        renderer_read_raw(read_buff, len);
 
-//     renderer_adc_enable(renderer->i2s_num);    
-//     renderer_read_raw(read_buff, len);
-//     renderer_adc_disable(renderer->i2s_num);
+        i2s_adc_data_scale1(d_buff, read_buff, len);
+        audio_recorder_quicksort(d_buff, len/2, 0, len/2 - 1);
 
-//     i2s_adc_data_scale1(d_buff, read_buff, len);
-//     audio_recorder_quicksort(d_buff, len/2, 0, len/2 - 1);
-//     // for(int i = 0; i < len/2; i++)
-//     //     printf("%d\n", d_buff[i]);
-//     // int i;
-//     // uint32_t sum1 = 0;
-//     // uint32_t sum2 = 0;
-//     // for(i = 0; i < 10; i++){
-//     //     sum1 += d_buff[i+1];
-//     //     sum2 += d_buff[len/2 - 2 - i];
-//     // }
-
-//     // uint32_t sum = (sum2 -sum1)/10;
-//     uint32_t sum = d_buff[len/2-2] - d_buff[1];
-//     free(read_buff);
-//     free(d_buff);
-//     return MP_OBJ_NEW_SMALL_INT(sum);
-// }
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(audio_loudness_obj, audio_loudness);
+        uint32_t sum = d_buff[len/2-2] - d_buff[1]; //输出最大最小值之差值
+        free(read_buff);
+        free(d_buff);
+        return MP_OBJ_NEW_SMALL_INT(sum);
+    }
+    else{
+        mp_warning(NULL, "Please init recorder first.");
+    }
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(audio_loudness_obj, audio_loudness);
 
 STATIC mp_obj_t audio_record(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 {
@@ -675,7 +669,7 @@ STATIC const mp_map_elem_t mpython_audio_locals_dict_table[] = {
     {MP_OBJ_NEW_QSTR(MP_QSTR_xunfei_tts_config), (mp_obj_t)&audio_webtts_config_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_xunfei_tts), (mp_obj_t)&webtts_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_recorder_init), (mp_obj_t)&audio_recorder_init_obj},
-    // {MP_OBJ_NEW_QSTR(MP_QSTR_loudness), (mp_obj_t)&audio_loudness_obj},
+    {MP_OBJ_NEW_QSTR(MP_QSTR_loudness), (mp_obj_t)&audio_loudness_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_record), (mp_obj_t)&audio_record_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_recorder_deinit), (mp_obj_t)&audio_recorder_deinit_obj},
     {MP_OBJ_NEW_QSTR(MP_QSTR_xunfei_iat_config), (mp_obj_t)&audio_iat_config_obj},

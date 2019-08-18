@@ -117,6 +117,12 @@ INC_ESPCOMP += -I$(ESPCOMP)/smartconfig_ack/include
 INC += -I$(TOP)/ports/esp32/codec/codec_lib/helix/include
 INC += -I$(TOP)/ports/esp32/codec/decoder/include
 INC += -I$(TOP)/ports/esp32/codec/include
+INC += -I$(TOP)/drivers/mpu6050/driver/include
+INC += -I$(TOP)/drivers/mpu6050/driver/eMPL
+INC += -I$(TOP)/drivers/mpu6050/driver/esp32
+INC += -I$(TOP)/drivers/mpu6050/eMPL-hal
+INC += -I$(TOP)/drivers/mpu6050/mpl
+INC += -I$(TOP)/drivers/mpu6050/mllite
 #		esp_http_client
 INC_ESPCOMP += -I$(ESPCOMP)/esp_http_client/include
 INC_ESPCOMP += -I$(ESPCOMP)/esp_http_client/lib/include
@@ -138,6 +144,7 @@ CFLAGS += -DIDF_VER=\"$(IDF_VER)\"
 CFLAGS += $(CFLAGS_MOD)
 CFLAGS += -DARM -DCONFIG_AUDIO_HELIX    # 避免编译音频库出错
 CFLAGS += -Wno-unused-but-set-variable
+CFLAGS += -Wno-unused-local-typedefs
 
 # this is what ESPIDF uses for c++ compilation
 CXXFLAGS = -std=gnu++11 $(CFLAGS_COMMON) $(INC) $(INC_ESPCOMP)
@@ -210,6 +217,7 @@ SRC_C = \
 	modmusic.c \
 	modmusictunes.c \
 	modradio.c \
+	modmotion.c \
 	$(SRC_MOD)
 
 EXTMOD_SRC_C = $(addprefix extmod/,\
@@ -234,6 +242,19 @@ endif
 DRIVERS_SRC_C = $(addprefix drivers/,\
 	bus/softspi.c \
 	dht/dht.c \
+	mpu6050/driver/eMPL/inv_mpu_dmp_motion_driver.c \
+	mpu6050/driver/eMPL/inv_mpu.c \
+	mpu6050/driver/esp32/log_esp32.c \
+	mpu6050/eMPL-hal/eMPL_outputs.c \
+	mpu6050/mllite/data_builder.c \
+	mpu6050/mllite/hal_outputs.c \
+	mpu6050/mllite/message_layer.c \
+	mpu6050/mllite/ml_math_func.c \
+	mpu6050/mllite/mlmath.c \
+	mpu6050/mllite/mpl.c \
+	mpu6050/mllite/results_holder.c \
+	mpu6050/mllite/start_manager.c \
+	mpu6050/mllite/storage_manager.c \
 	)
 
 # 开机显示和异常打印功能模块
@@ -942,6 +963,7 @@ $(eval $(call gen_espidf_lib_rule,tcp_transport,$(ESPIDF_TCP_TRANSPORT_O)))
 $(eval $(call gen_espidf_lib_rule,esp-tls,$(ESPIDF_ESP_TLS_O)))
 
 LIB = $(foreach lib,$(LIB_ESPIDF),$(BUILD_ESPIDF_LIB)/$(lib)/lib$(lib).a)
+LIB1 = $(TOP)/drivers/mpu6050/mpl/libmpllib.a
 
 ################################################################################
 # ESP IDF ldgen
@@ -1025,6 +1047,7 @@ APP_LD_ARGS += $(ESPCOMP)/esp32/libhal.a
 APP_LD_ARGS += -L$(ESPCOMP)/esp32/lib -lcore -lmesh -lnet80211 -lphy -lrtc -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lespnow
 APP_LD_ARGS += $(OBJ)
 APP_LD_ARGS += $(LIB)
+APP_LD_ARGS += $(LIB1)
 APP_LD_ARGS += --end-group
 
 $(BUILD)/esp32_out.ld: $(SDKCONFIG_H)
@@ -1034,7 +1057,7 @@ $(BUILD)/application.bin: $(BUILD)/application.elf
 	$(ECHO) "Create $@"
 	$(Q)$(ESPTOOL) --chip esp32 elf2image --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) --flash_size $(FLASH_SIZE) $<
 
-$(BUILD)/application.elf: $(OBJ) $(LIB) $(BUILD)/esp32_out.ld $(BUILD)/esp32.common.ld
+$(BUILD)/application.elf: $(OBJ) $(LIB) $(LIB1) $(BUILD)/esp32_out.ld $(BUILD)/esp32.common.ld
 	$(ECHO) "LINK $@"
 	$(Q)$(LD) $(LDFLAGS) -o $@ $(APP_LD_ARGS)
 	$(Q)$(SIZE) $@

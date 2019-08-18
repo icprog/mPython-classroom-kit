@@ -114,7 +114,7 @@ void audio_recorder_quicksort(uint16_t *buff, uint16_t len)
  ********************************/
 static void swap(uint16_t *a, uint16_t *b)  
 {
-    uint16_t temp;
+    int16_t temp;
     temp = *a;
     *a = *b;
     *b = temp;
