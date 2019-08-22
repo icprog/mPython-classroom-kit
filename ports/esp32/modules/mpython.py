@@ -134,13 +134,13 @@ class Accelerometer():
             pass
         
     def get_x(self):
-        return motion_mpu6050.accel()[0]/65536
+        return -motion_mpu6050.accel()[1]/65536
 
     def get_y(self):
-        return motion_mpu6050.accel()[1]/65536
+        return motion_mpu6050.accel()[0]/65536
 
     def get_z(self):
-        return motion_mpu6050.accel()[2]/65536
+        return -motion_mpu6050.accel()[2]/65536
 
 class Motion():
 
@@ -150,14 +150,22 @@ class Motion():
             pass
 
     def get_accel(self):
-        return tuple([i/65536 for i in motion_mpu6050.accel()])
+        n =  list(motion_mpu6050.accel())
+        n[0] = -n[0]
+        n[2] = -n[2]
+        return tuple([i/65536 for i in n])
 
     def get_gyro(self):
         return tuple([i/65536 for i in motion_mpu6050.gyro()])
 
+    # output following: Pitch: -180 to 180 Roll: -90 to 90 Yaw: -180 to 180
     def get_euler(self):
-        return tuple([i/65536 for i in motion_mpu6050.euler()])
-
+        n =  list([i/65536 for i in motion_mpu6050.euler()])
+        n[0] = (-(n[0]+180) if n[0]<0 else -(n[0]-180))
+        n[1] = -n[1]
+        return tuple(n)
+        
+    # output w x y z
     def get_quat(self):
         return tuple([i/math.pow(2, 30) for i in motion_mpu6050.quat()])
 

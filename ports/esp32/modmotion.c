@@ -30,7 +30,6 @@
 #include "quaternion_supervisor.h"
 #include "mag_disturb.h"
 #include "results_holder.h"
-#include "py/mphal.h" 
 
 static const char *TAG = "MPU6050";
 #define MPU6050_ADDR 104 

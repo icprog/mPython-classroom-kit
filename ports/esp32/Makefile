@@ -963,7 +963,7 @@ $(eval $(call gen_espidf_lib_rule,tcp_transport,$(ESPIDF_TCP_TRANSPORT_O)))
 $(eval $(call gen_espidf_lib_rule,esp-tls,$(ESPIDF_ESP_TLS_O)))
 
 LIB = $(foreach lib,$(LIB_ESPIDF),$(BUILD_ESPIDF_LIB)/$(lib)/lib$(lib).a)
-LIB1 = $(TOP)/drivers/mpu6050/mpl/libmpllib.a
+#LIB1 = $(TOP)/drivers/mpu6050/mpl/libmpllib.a
 
 ################################################################################
 # ESP IDF ldgen
@@ -1047,7 +1047,7 @@ APP_LD_ARGS += $(ESPCOMP)/esp32/libhal.a
 APP_LD_ARGS += -L$(ESPCOMP)/esp32/lib -lcore -lmesh -lnet80211 -lphy -lrtc -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lespnow
 APP_LD_ARGS += $(OBJ)
 APP_LD_ARGS += $(LIB)
-APP_LD_ARGS += $(LIB1)
+#APP_LD_ARGS += $(LIB1)
 APP_LD_ARGS += --end-group
 
 $(BUILD)/esp32_out.ld: $(SDKCONFIG_H)
@@ -1057,7 +1057,7 @@ $(BUILD)/application.bin: $(BUILD)/application.elf
 	$(ECHO) "Create $@"
 	$(Q)$(ESPTOOL) --chip esp32 elf2image --flash_mode $(FLASH_MODE) --flash_freq $(FLASH_FREQ) --flash_size $(FLASH_SIZE) $<
 
-$(BUILD)/application.elf: $(OBJ) $(LIB) $(LIB1) $(BUILD)/esp32_out.ld $(BUILD)/esp32.common.ld
+$(BUILD)/application.elf: $(OBJ) $(LIB) $(BUILD)/esp32_out.ld $(BUILD)/esp32.common.ld
 	$(ECHO) "LINK $@"
 	$(Q)$(LD) $(LDFLAGS) -o $@ $(APP_LD_ARGS)
 	$(Q)$(SIZE) $@
