@@ -123,6 +123,7 @@ INC += -I$(TOP)/drivers/mpu6050/driver/esp32
 INC += -I$(TOP)/drivers/mpu6050/eMPL-hal
 INC += -I$(TOP)/drivers/mpu6050/mpl
 INC += -I$(TOP)/drivers/mpu6050/mllite
+INC += -I$(TOP)/ports/esp32/RGBLed5x5
 #		esp_http_client
 INC_ESPCOMP += -I$(ESPCOMP)/esp_http_client/include
 INC_ESPCOMP += -I$(ESPCOMP)/esp_http_client/lib/include
@@ -218,6 +219,9 @@ SRC_C = \
 	modmusictunes.c \
 	modradio.c \
 	modmotion.c \
+	RGBLed5x5/constimage.c \
+	RGBLed5x5/image.c \
+	RGBLed5x5/rgb_display.c \
 	$(SRC_MOD)
 
 EXTMOD_SRC_C = $(addprefix extmod/,\

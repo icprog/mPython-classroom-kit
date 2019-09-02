@@ -225,6 +225,7 @@ struct _machine_timer_obj_t;
     mp_obj_t machine_pin_irq_handler[40]; \
     struct _machine_timer_obj_t *machine_timer_obj_head; \
     struct _music_data_t * music_data;\
+    void *async_data[2]; \
 
 
 // type definitions for the specific machine

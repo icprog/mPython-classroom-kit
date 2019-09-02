@@ -50,6 +50,9 @@
 
 #if MICROPY_PY_MACHINE
 
+typedef struct _mpython_display_obj_t mpython_display_obj_t;
+extern mpython_display_obj_t mpython_display_obj;
+
 typedef enum {
     MP_PWRON_RESET = 1,
     MP_HARD_RESET,
@@ -235,6 +238,7 @@ STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_Timer), MP_ROM_PTR(&machine_timer_type) },
     { MP_ROM_QSTR(MP_QSTR_WDT), MP_ROM_PTR(&machine_wdt_type) },
+    { MP_ROM_QSTR(MP_QSTR_display), MP_ROM_PTR(&mpython_display_obj) },
 
     // wake abilities
     { MP_ROM_QSTR(MP_QSTR_SLEEP), MP_ROM_INT(MACHINE_WAKE_SLEEP) },
@@ -249,6 +253,7 @@ STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_RTC), MP_ROM_PTR(&machine_rtc_type) },
     { MP_ROM_QSTR(MP_QSTR_SPI), MP_ROM_PTR(&mp_machine_soft_spi_type) },
     { MP_ROM_QSTR(MP_QSTR_UART), MP_ROM_PTR(&machine_uart_type) },
+    { MP_ROM_QSTR(MP_QSTR_Image), MP_ROM_PTR(&machine_image_type) },
 
     // Reset reasons
     { MP_ROM_QSTR(MP_QSTR_reset_cause), MP_ROM_PTR(&machine_reset_cause_obj) },
