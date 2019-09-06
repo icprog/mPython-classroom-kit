@@ -136,7 +136,7 @@ class Es8388():
             dac_ctr3 &= 0xFB
          self._i2c.writeto(self.addr, bytearray([0x19, dac_ctr3]))
 
-uart2 = UART(2, baudrate=115200, rx=Pin.P8, tx=Pin.P23, timeout=20, timeout_char = 20, rxbuf = 256)
+uart2 = UART(2, baudrate=115200, rx=Pin.P8, tx=Pin.P23, timeout=50, timeout_char = 1024, rxbuf = 1024, txbuf = 256)
 
 class K210Error(Exception):
    """K210异常类"""
@@ -155,21 +155,29 @@ class K210():
                         return
         raise K210Error("K210 init failed!")
 
-   def send_cmd(self, command, timeout = 100):
+   def send_cmd(self, command, wait=True, timeout=100):
       json_stream = ujson.dumps(command)
       uart2.write(json_stream + '\n')
+      # print("UART_Send:%s" % (json_stream + '\n'))
       t1 = time.ticks_ms()
-      while True:
+      while wait:
          if uart2.any() > 0:
                r = uart2.readline()
+               # print("UART_Recv:%s" % r)
                try:
                   rsp = ujson.loads(r)
-                  return rsp 
-               except:
-                  pass
+               except Exception as e:
+                  print(e)
+                  break  
+               if rsp and isinstance(rsp, dict):
+                  for key, value in rsp.items():
+                     if key == 'ERROR':
+                        raise K210Error(value)
+
+               return rsp
          if time.ticks_diff(time.ticks_ms(), t1) > timeout:
-            # raise K210Error("k210 not respone!") 
-            break           
+            # raise K210Error("k210 not respone!")
+            break
       return None
 
    def get_key(self):
@@ -188,24 +196,6 @@ class K210():
                   return value
       return None
 
-   def ai_recognize(self):
-      rsp = self.send_cmd({'SNAPSOT':'ai'})
-      if rsp and isinstance(rsp, dict):
-            for key,value in rsp.items():
-               if key == 'FACES': 
-                  if value:
-                     return value[0]
-      return None
-
-   def monitor(self, mode):
-      rsp = self.send_cmd({'MONITOR':mode})
-      if rsp and isinstance(rsp, dict):
-         for key,value in rsp.items():
-               if key == 'FACES':
-                  if value:
-                     return value[0]
-      return None
-
    def set_motor(self, speed):
       rsp = self.send_cmd({'SET_MOTOR':speed})
       if rsp and isinstance(rsp, dict):
@@ -215,3 +205,44 @@ class K210():
       return None
 
 
+   def select_model(self,*args):
+
+      self.send_cmd({'SELE_MOD':args[0]})
+
+   def load_model(self,**kws):
+
+      self.send_cmd({'LOD_MOD':kws})
+
+   def detect_yolo(self):
+      rsp = self.send_cmd({'DET_YO':0})
+      if rsp and isinstance(rsp, dict):
+         for key,value in rsp.items():
+            if key == 'RET_DET_YO': 
+               return value
+      return None
+
+   def predict_net(self):
+      rsp = self.send_cmd({'PRE_NET':0})
+      if rsp and isinstance(rsp, dict):
+         for key,value in rsp.items():
+            if key == 'RET_PRE_NET': 
+               return value
+      return None
+
+   def deinit_yolo(self):
+      self.send_cmd({'DINT_YO':0})
+
+   def camera_snapshot(self,*arg):
+      self.send_cmd({'SNAPSHOT':0})
+
+   def lcd_init(self,**kws):
+      self.send_cmd({'LCD_INT':kws})
+
+   def lcd_display(self,**kws):
+      self.send_cmd({'LCD_DISP':kws})
+
+   def lcd_clear(self,**kws):
+      self.send_cmd({'LCD_CLR':kws})
+
+   def lcd_draw_string(self,*args):
+      self.send_cmd({'LCD_STR':args})

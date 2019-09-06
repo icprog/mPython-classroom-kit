@@ -37,21 +37,75 @@ def set_motor(speed):
     """马达,范围±100"""
     if speed < -100 or speed > 100:
             raise K210Error("Invalid value,range in -100~100")
-    k210.set_motor(speed)
+    return k210.set_motor(speed)
 
 
-class AI():
+class Model(object):
+
     def __init__(self):
-        pass
+        self.FACE_YOLO = 1
+        self.CLASS_20_YOLO = 2
+        self.MNIST_NET = 3
+        self.CLASS_1000_NET =4
+        self.YOLO2=1
+        self.MOBILENET=2
 
-    def set_kmodel(self):
-        pass
+    def select_model(self, builtin=None):
+        """内置模型选择"""
+        k210.select_model(builtin)
 
-    def recognize(self):
-        return k210.ai_recognize()
+    def load_model(self, path,model_type,classes, anchor=None):
+        """加载外部模型"""
+        k210.load_model(path=path,model_type=model_type,classes=classes,anchor=anchor)
 
-    def monitor(self):
-        return k210.monitor('')
+    def detect_yolo(self):
+        """yolo模型应用"""
+        return k210.detect_yolo()
+
+    def deinit_yolo(self):
+        """模型释放"""
+        k210.deinit_yolo()
+
+    def predict_net(self):
+        """MobileNet模型预测"""
+        return k210.predict_net()
 
 
+class LCD(object):
+    BLACK = 0
+    NAVY = 15
+    DARKGREEN = 992
+    DARKCYAN = 1007
+    MAROON = 30720
+    PURPLE = 30735
+    OLIVE = 31712
+    LIGHTGREY = 50712
+    DARKGREY = 31727
+    BLUE = 31
+    GREEN = 2016
+    RED = 63488
+    MAGENTA = 63519
+    YELLOW = 65504
+    WHITE = 65535
+    ORANGE = 64800
+    GREENYELLOW = 45029
+    PINK = 63519
 
+    def init(self,freq=15000000,color = 0):
+        k210.lcd_init(freq=freq,color = color)
+
+    def display(self,oft=(0,0),roi=(0,0,320,240)):
+        k210.lcd_display(oft=oft,roi=roi)
+
+    def clear(self,color=0):
+        k210.lcd_clear(color=color)
+
+    def draw_string(self,*args):
+        k210.lcd_draw_string(*args)
+
+class Camera(object):
+
+    def snapshot(self):
+        k210.camera_snapshot()
+
+    
