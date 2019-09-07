@@ -253,12 +253,12 @@ class K210():
    def send_cmd(self, command, wait=True, timeout=500):
       json_stream = ujson.dumps(command)
       uart2.write(json_stream + '\n')
-      print("UART_Send:%s" % (json_stream + '\n'))
+      # print("UART_Send:%s" % (json_stream + '\n'))
       t1 = time.ticks_ms()
       while wait:
          if uart2.any() > 0:
                r = uart2.readline()
-               print("UART_Recv:%s" % r)
+               # print("UART_Recv:%s" % r)
                try:
                   rsp = ujson.loads(r)
                except Exception as e:
