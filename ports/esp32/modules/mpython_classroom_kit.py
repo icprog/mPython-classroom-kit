@@ -11,32 +11,36 @@ import time, ujson
 from mpython_classroom_kit_driver import K210,K210Error
 from mpython import i2c
 # human infrared
-pir = Pin(21, mode = Pin.IN, pull = None)
+pir = Pin(21, mode=Pin.IN, pull=None)
 
 # slide POT
-slider_res =  ADC(Pin(34))
+slider_res = ADC(Pin(34))
 slider_res.atten(slider_res.ATTN_11DB)
 
 k210 = K210()
+
 
 def get_distance():
     """超声波,范围2~340cm"""
     return k210.get_distance()
 
+
 def get_key():
     """方向按键,返回按键列表"""
     key_map = {0: 'left', 1: 'right', 2: 'up', 3: 'down', 4: 'ok'}
-    key_set=set()
+    key_set = set()
     _key = k210.get_key()
-    for i in range(5):
-        if _key !=None and (_key >> i) & 0x01 :
-            key_set.add(key_map[i])
+    if _key:
+        for i in range(5):
+            if (_key >> i) & 0x01:
+                key_set.add(key_map[i])
     return key_set
+
 
 def set_motor(speed):
     """马达,范围±100"""
     if speed < -100 or speed > 100:
-            raise K210Error("Invalid value,range in -100~100")
+            raise ValueError("Invalid value,Range in -100~100")
     return k210.set_motor(speed)
 
 
@@ -46,17 +50,18 @@ class Model(object):
         self.FACE_YOLO = 1
         self.CLASS_20_YOLO = 2
         self.MNIST_NET = 3
-        self.CLASS_1000_NET =4
-        self.YOLO2=1
-        self.MOBILENET=2
+        self.CLASS_1000_NET = 4
+        self.YOLO2 = 1
+        self.MOBILENET = 2
 
     def select_model(self, builtin=None):
         """内置模型选择"""
         k210.select_model(builtin)
 
-    def load_model(self, path,model_type,classes, anchor=None):
+    def load_model(self, path, model_type, classes, anchor=None):
         """加载外部模型"""
-        k210.load_model(path=path,model_type=model_type,classes=classes,anchor=anchor)
+        k210.load_model(path=path, model_type=model_type,
+                        classes=classes, anchor=anchor)
 
     def detect_yolo(self):
         """yolo模型应用"""
@@ -91,21 +96,134 @@ class LCD(object):
     GREENYELLOW = 45029
     PINK = 63519
 
-    def init(self,freq=15000000,color = 0):
-        k210.lcd_init(freq=freq,color = color)
+    def init(self, *args,**kws):
+        k210.lcd_init(*args,**kws)
 
-    def display(self,oft=(0,0),roi=(0,0,320,240)):
-        k210.lcd_display(oft=oft,roi=roi)
+    def display(self,**kws):
+        k210.lcd_display(**kws)
 
-    def clear(self,color=0):
+    def clear(self, color=0):
         k210.lcd_clear(color=color)
 
-    def draw_string(self,*args):
+    def draw_string(self, *args):
         k210.lcd_draw_string(*args)
 
+
 class Camera(object):
+    RGB565 = 2
+    GRAYSCALE = 4
+    def reset(self):
+        k210.camera_reset()
+
+    def run(self,*arg):
+        k210.camera_run(*arg)
 
     def snapshot(self):
         k210.camera_snapshot()
 
-    
+    def set_pixformat(self,*arg):
+        k210.camera_set_pixformat(*arg)
+
+    def set_contrast(self,*arg):
+        if arg[0] < -2 or arg[0] > 2:
+            raise ValueError("Invalid value,Range in -2~2")
+        k210.camera_set_contrast(*arg)
+
+    def set_brightness(self,*arg):
+        if arg[0] < -2 or arg[0] > 2:
+            raise ValueError("Invalid value,Range in -2~2")
+        k210.camera_set_brightness(*arg)
+
+    def set_saturation(self,*arg):
+        if arg[0] < -2 or arg[0] > 2:
+            raise ValueError("Invalid value,Range in -2~2")
+        k210.camera_set_saturation(*arg)
+
+    def set_auto_gain(self,*arg,**kw):
+        k210.camera_set_auto_gain(*arg,**kw)
+
+    def set_auto_whitebal(self,*arg):
+        k210.camera_set_auto_whitebal(*arg)
+
+    def set_windowing(self,*arg):
+        k210.camera_set_windowing(*arg)
+
+    def set_hmirror(self,*arg):
+        k210.camera_set_hmirror(*arg)
+
+    def set_vflip(self,*arg):
+        k210.camera_set_vflip(*arg)
+
+
+class Img(object):
+
+    def load(self, *args, **kws):
+        k210.image_load(*args, **kws)
+
+    def width(self):
+        return int(k210.image_width())
+
+    def hight(self):
+        return int(k210.image_hight())
+
+    def format(self):
+        return int(k210.image_format())
+
+    def size(self):
+        return int(k210.image_size())
+
+    def get_pixel(self, *args, **kws):
+        temp = k210.image_get_pixel(*args, **kws)
+        if temp:
+            return tuple(temp)
+
+    def set_pixel(self, *args, **kws):
+        k210.image_set_pixel(*args, **kws)
+
+    def mean_pool(self, *args, **kws):
+        k210.image_mean_pool(*args, **kws)
+
+    def to_grayscale(self):
+        k210.image_to_grayscale()
+
+    def to_rainbow(self):
+        k210.image_to_rainbow()
+
+    def copy(self,*args, **kws):
+        k210.image_copy(*args, **kws)
+
+    def save(self,*args, **kws):
+        k210.image_save(*args, **kws)
+
+    def clear(self):
+        k210.image_clear()
+
+    def draw_line(self,*args, **kws):
+        k210.image_draw_line(*args, **kws)
+
+    def draw_rectangle(self,*args, **kws):
+        k210.image_draw_rectangle(*args, **kws)
+
+    def draw_circle(self,*args, **kws):
+        k210.image_draw_circle(*args, **kws)
+
+    def draw_string(self,*args, **kws):
+        k210.image_draw_string(*args, **kws)
+
+    def draw_cross(self,*args, **kws):
+        k210.image_draw_cross(*args, **kws)
+
+    def draw_arrow(self,*args, **kws):
+        k210.image_draw_arrow(*args, **kws)
+
+    def binary(self,*args, **kws):
+        k210.image_binary(*args, **kws)
+
+    def invert(self):
+        k210.image_invert()
+
+
+lcd = LCD()
+camera = Camera()
+model = Model()
+image = Img()
