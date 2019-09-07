@@ -29,7 +29,7 @@ def get_key():
     key_set=set()
     _key = k210.get_key()
     for i in range(5):
-        if (_key >> i) & 0x01 :
+        if _key !=None and (_key >> i) & 0x01 :
             key_set.add(key_map[i])
     return key_set
 
