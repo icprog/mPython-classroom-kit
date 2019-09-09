@@ -231,7 +231,7 @@ class Es8388():
 
 
 uart2 = UART(2, baudrate=115200, rx=Pin.P8, tx=Pin.P23,
-             timeout=50, timeout_char=1024, rxbuf=1024, txbuf=1024)
+             timeout=50, timeout_char=1024, rxbuf=512, txbuf=512)
 
 
 class K210Error(Exception):
