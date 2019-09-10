@@ -261,7 +261,7 @@ class K210():
                r = uart2.readline()
                r= r.strip()
                while uart2.readline():
-                     pass
+                  pass
                # print("UART_Recv:%s" % r)
                try:
                   rsp = ujson.loads(r)
