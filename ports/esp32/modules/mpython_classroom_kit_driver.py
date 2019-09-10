@@ -257,7 +257,11 @@ class K210():
       t1 = time.ticks_ms()
       while wait:
          if uart2.any() > 0:
+               r=None
                r = uart2.readline()
+               r= r.strip()
+               while uart2.readline():
+                     pass
                # print("UART_Recv:%s" % r)
                try:
                   rsp = ujson.loads(r)
@@ -275,20 +279,20 @@ class K210():
             break
       return None
 
-   def response_value(self, rsp, key):
+   def response_value(self, rsp, _key):
          for key, value in rsp.items():
-            if key == key:
+            if key == _key:
                return value
 
    def get_key(self):
-      rsp = self.send_cmd({'GET_KEYS': 0}, timeout = 500)
+      rsp = self.send_cmd({'GET_KEYS': 0}, timeout = 200)
 
       if rsp and isinstance(rsp, dict):
          return self.response_value(rsp, 'RET_KEYS')
       return None
 
    def get_distance(self):
-      rsp = self.send_cmd({'GET_DISTANCE': 0}, timeout = 500)
+      rsp = self.send_cmd({'GET_DISTANCE': 0}, timeout = 200)
       if rsp and isinstance(rsp, dict):
          return self.response_value(rsp, 'RET_DISTANCE')
       return None
@@ -323,55 +327,55 @@ class K210():
       self.send_cmd({'DINT_YO': 0})
 
    def camera_snapshot(self, *arg):
-      self.send_cmd({'SNAPSHOT': 0}, False)
+      self.send_cmd({'SNAPSHOT': 0})
 
    def camera_reset(self):
-      self.send_cmd({'CAM_RST': 0}, False)
+      self.send_cmd({'CAM_RST': 0})
 
    def camera_run(self, *arg):
-      self.send_cmd({'CAM_RUN': arg[0]}, False)
+      self.send_cmd({'CAM_RUN': arg[0]})
 
    def camera_set_pixformat(self, *arg):
-      self.send_cmd({'CAM_SET_PF': arg[0]}, False)
+      self.send_cmd({'CAM_SET_PF': arg[0]})
 
    def camera_set_contrast(self, *arg):
-      self.send_cmd({'CAM_SET_CRA': arg[0]}, False)
+      self.send_cmd({'CAM_SET_CRA': arg[0]})
 
    def camera_set_brightness(self, *arg):
-      self.send_cmd({'CAM_SET_BRG': arg[0]}, False)
+      self.send_cmd({'CAM_SET_BRG': arg[0]})
 
    def camera_set_saturation(self, *arg):
-      self.send_cmd({'CAM_SET_SAT': arg[0]}, False)
+      self.send_cmd({'CAM_SET_SAT': arg[0]})
 
    def camera_set_auto_gain(self, *arg, **kw):
-      self.send_cmd({'CAM_AUTO_GAIN': [arg, kw]}, False)
+      self.send_cmd({'CAM_AUTO_GAIN': [arg, kw]})
 
    def camera_set_auto_whitebal(self, *arg):
-      self.send_cmd({'CAM_AUTO_WBAL': arg[0]}, False)
+      self.send_cmd({'CAM_AUTO_WBAL': arg[0]})
 
    def camera_set_windowing(self, *arg):
-      self.send_cmd({'CAM_SET_WIN': arg[0]}, False)
+      self.send_cmd({'CAM_SET_WIN': arg[0]})
 
    def camera_set_hmirror(self, *arg):
-      self.send_cmd({'CAM_SET_HM': arg[0]}, False)
+      self.send_cmd({'CAM_SET_HM': arg[0]})
 
    def camera_set_vflip(self, *arg):
-      self.send_cmd({'CAM_SET_VF': arg[0]}, False)
+      self.send_cmd({'CAM_SET_VF': arg[0]})
 
    def lcd_init(self, *args, **kws):
-      self.send_cmd({'LCD_INT': [args, kws]}, False)
+      self.send_cmd({'LCD_INT': [args, kws]})
 
    def lcd_display(self, **kws):
-      self.send_cmd({'LCD_DISP': kws}, False)
+      self.send_cmd({'LCD_DISP': kws})
 
    def lcd_clear(self, **kws):
-      self.send_cmd({'LCD_CLR': kws}, False)
+      self.send_cmd({'LCD_CLR': kws})
 
    def lcd_draw_string(self, *args):
-      self.send_cmd({'LCD_STR': args}, False)
+      self.send_cmd({'LCD_STR': args})
 
    def image_load(self, *args, **kws):
-      self.send_cmd({'IMG_LOD': [args, kws]}, False)
+      self.send_cmd({'IMG_LOD': [args, kws]})
 
    def image_width(self):
       rsp = self.send_cmd({'IMG_WID': 0})
@@ -399,49 +403,49 @@ class K210():
          return self.response_value(rsp, 'RET_IMG_GET_PIX')
 
    def image_set_pixel(self, *args, **kws):
-      self.send_cmd({'IMG_SET_PIX': [args, kws]}, False)
+      self.send_cmd({'IMG_SET_PIX': [args, kws]})
 
    def image_mean_pool(self, *args, **kws):
-      self.send_cmd({'IMG_MEAN_P': [args, kws]}, False)
+      self.send_cmd({'IMG_MEAN_P': [args, kws]})
 
    def image_to_grayscale(self):
-      self.send_cmd({'IMG_TO_GRAY': 0}, False)
+      self.send_cmd({'IMG_TO_GRAY': 0})
 
    def image_to_rainbow(self):
-      self.send_cmd({'IMG_TO_RB': 0}, False)
+      self.send_cmd({'IMG_TO_RB': 0})
 
    def image_copy(self, *args, **kws):
-      self.send_cmd({'IMG_CPY': [args, kws]}, False)
+      self.send_cmd({'IMG_CPY': [args, kws]})
 
    def image_save(self, *args, **kws):
-      self.send_cmd({'IMG_SAVE': [args, kws]}, False)
+      self.send_cmd({'IMG_SAVE': [args, kws]})
 
    def image_clear(self):
-      self.send_cmd({'IMG_CLR': 0}, False)
+      self.send_cmd({'IMG_CLR': 0})
 
    def image_draw_line(self, *args, **kws):
-      self.send_cmd({'IMG_DRW_LN': [args, kws]}, False)
+      self.send_cmd({'IMG_DRW_LN': [args, kws]})
 
    def image_draw_rectangle(self, *args, **kws):
-      self.send_cmd({'IMG_DRW_RECTANG': [args, kws]}, False)
+      self.send_cmd({'IMG_DRW_RECTANG': [args, kws]})
 
    def image_draw_circle(self, *args, **kws):
-      self.send_cmd({'IMG_DRW_CIR': [args, kws]}, False)
+      self.send_cmd({'IMG_DRW_CIR': [args, kws]})
 
    def image_draw_string(self, *args, **kws):
-      self.send_cmd({'IMG_DRW_STR': [args, kws]}, False)
+      self.send_cmd({'IMG_DRW_STR': [args, kws]})
 
    def image_draw_cross(self, *args, **kws):
-      self.send_cmd({'IMG_DRW_CRS': [args, kws]}, False)
+      self.send_cmd({'IMG_DRW_CRS': [args, kws]})
 
    def image_draw_arrow(self, *args, **kws):
-      self.send_cmd({'IMG_DRW_ARR': [args, kws]}, False)
+      self.send_cmd({'IMG_DRW_ARR': [args, kws]})
 
    def image_draw_image(self, *args, **kws):
-      self.send_cmd({'IMG_DRW_IMG': [args, kws]}, False)
+      self.send_cmd({'IMG_DRW_IMG': [args, kws]})
 
    def image_binary(self, *args, **kws):
-      self.send_cmd({'IMG_BINARY': [args, kws]}, False)
+      self.send_cmd({'IMG_BINARY': [args, kws]})
 
    def image_invert(self):
-      self.send_cmd({'IMG_INVERT': 0}, False)
+      self.send_cmd({'IMG_INVERT': 0})
