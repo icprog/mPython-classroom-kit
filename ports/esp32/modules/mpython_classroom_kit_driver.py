@@ -250,7 +250,7 @@ class K210():
                         return
         raise K210Error("K210 init failed!")
 
-   def send_cmd(self, command, wait=True, timeout=100):
+   def send_cmd(self, command, wait=True, timeout=20):
       json_stream = ujson.dumps(command)
       uart2.write(json_stream + '\n')
       # print("UART_Send:%s" % (json_stream + '\n'))
@@ -285,14 +285,14 @@ class K210():
                return value
 
    def get_key(self):
-      rsp = self.send_cmd({'GET_KEYS': 0}, timeout = 200)
+      rsp = self.send_cmd({'GET_KEYS': 0}, timeout = 100)
 
       if rsp and isinstance(rsp, dict):
          return self.response_value(rsp, 'RET_KEYS')
       return None
 
    def get_distance(self):
-      rsp = self.send_cmd({'GET_DISTANCE': 0}, timeout = 200)
+      rsp = self.send_cmd({'GET_DISTANCE': 0}, timeout = 100)
       if rsp and isinstance(rsp, dict):
          return self.response_value(rsp, 'RET_DISTANCE')
       return None
