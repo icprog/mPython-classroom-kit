@@ -32,10 +32,9 @@ def get_key():
     _key = k210.get_key()
     if _key:
         for i in range(5):
-            if _key !=None and ((_key >> i) & 0x01):
+            if ((_key >> i) & 0x01):
                 key_set.add(key_map[i])
     return key_set
-
 
 def set_motor(speed):
     """马达,范围±100"""
@@ -43,6 +42,8 @@ def set_motor(speed):
             raise ValueError("Invalid value,Range in -100~100")
     return k210.set_motor(speed)
 
+def k210_reset():
+    k210.reset()
 
 class Model(object):
 
@@ -67,14 +68,18 @@ class Model(object):
         """yolo模型应用"""
         return k210.detect_yolo()
 
-    def deinit_yolo(self):
-        """模型释放"""
-        k210.deinit_yolo()
-
     def predict_net(self):
         """MobileNet模型预测"""
         return k210.predict_net()
 
+    def deinit_yolo(self):
+        """yolo释放"""
+        k210.deinit_yolo()
+
+    def deinit_net(self):
+        """net释放"""
+        k210.deinit_net()
+ 
 
 class LCD(object):
     BLACK = 0

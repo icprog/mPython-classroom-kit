@@ -250,7 +250,7 @@ class K210():
                         return
         raise K210Error("K210 init failed!")
 
-   def send_cmd(self, command, wait=True, timeout=20):
+   def send_cmd(self, command, wait=True, timeout=50):
       json_stream = ujson.dumps(command)
       uart2.write(json_stream + '\n')
       # print("UART_Send:%s" % (json_stream + '\n'))
@@ -285,14 +285,14 @@ class K210():
                return value
 
    def get_key(self):
-      rsp = self.send_cmd({'GET_KEYS': 0}, timeout = 100)
+      rsp = self.send_cmd({'GET_KEYS': 0}, timeout = 200)
 
       if rsp and isinstance(rsp, dict):
          return self.response_value(rsp, 'RET_KEYS')
       return None
 
    def get_distance(self):
-      rsp = self.send_cmd({'GET_DISTANCE': 0}, timeout = 100)
+      rsp = self.send_cmd({'GET_DISTANCE': 0}, timeout = 200)
       if rsp and isinstance(rsp, dict):
          return self.response_value(rsp, 'RET_DISTANCE')
       return None
@@ -303,13 +303,16 @@ class K210():
          return self.response_value(rsp, 'RET_MOTOR')
       return None
 
+   def reset(self):
+      self.send_cmd({'RESET': 0})
+
    def select_model(self, *args):
 
-      self.send_cmd({'SELE_MOD': args[0]}, wait=True)
+      self.send_cmd({'SELE_MOD': args[0]}, timeout=100)
 
    def load_model(self, **kws):
 
-      self.send_cmd({'LOD_MOD': kws})
+      self.send_cmd({'LOD_MOD': kws}, timeout=100)
 
    def detect_yolo(self):
       rsp = self.send_cmd({'DET_YO': 0})
@@ -325,6 +328,9 @@ class K210():
 
    def deinit_yolo(self):
       self.send_cmd({'DINT_YO': 0})
+
+   def deinit_net(self):
+      self.send_cmd({'DINT_NET': 0})
 
    def camera_snapshot(self, *arg):
       self.send_cmd({'SNAPSHOT': 0})
